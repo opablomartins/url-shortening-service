@@ -2,6 +2,7 @@ import { ConflictException, Injectable, Logger, NotFoundException } from '@nestj
 import { nanoid } from 'nanoid';
 import { CreateUrlDto } from './dto/create-url.dto';
 import { UpdateUrlDto } from './dto/update-url.dto';
+import { UrlResponseDto } from './dto/url-response.dto';
 import { Url } from './entities/url.entity';
 import { UrlRepository } from './url.repository';
 
@@ -14,7 +15,7 @@ export class UrlService {
 
   constructor(private readonly urlRepository: UrlRepository) {}
 
-  async create(dto: CreateUrlDto): Promise<Url> {
+  async create(dto: CreateUrlDto): Promise<UrlResponseDto> {
     let attempts = 0;
 
     while (attempts < MAX_RETRIES) {
@@ -22,8 +23,9 @@ export class UrlService {
       const existing = await this.urlRepository.findByCode(shortCode);
 
       if (!existing) {
-        this.logger.log(`Creating short URL for: ${dto.originalUrl}`);
-        return this.urlRepository.save({ originalUrl: dto.originalUrl, shortCode });
+        this.logger.log(`Creating short URL for: ${dto.url}`);
+        const created = await this.urlRepository.save({ url: dto.url, shortCode });
+        return UrlResponseDto.fromEntity(created);
       }
 
       attempts++;
@@ -33,7 +35,7 @@ export class UrlService {
     throw new ConflictException('Failed to generate a unique short code. Please try again.');
   }
 
-  async findByCode(shortCode: string): Promise<Url> {
+  async findByCode(shortCode: string): Promise<UrlResponseDto> {
     const url = await this.urlRepository.findByCode(shortCode);
 
     if (!url) {
@@ -43,20 +45,20 @@ export class UrlService {
     await this.urlRepository.incrementAccessCount(shortCode);
     this.logger.log(`Access registered for short code: ${shortCode}`);
 
-    return { ...url, accessCount: url.accessCount + 1 };
+    return UrlResponseDto.fromEntity(url);
   }
 
-  async update(shortCode: string, dto: UpdateUrlDto): Promise<Url> {
+  async update(shortCode: string, dto: UpdateUrlDto): Promise<UrlResponseDto> {
     const existing = await this.urlRepository.findByCode(shortCode);
 
     if (!existing) {
       throw new NotFoundException(`Short code "${shortCode}" not found`);
     }
 
-    const updated = await this.urlRepository.updateOriginalUrl(shortCode, dto.originalUrl);
+    const updated = await this.urlRepository.updateUrl(shortCode, dto.url);
     this.logger.log(`Updated short code: ${shortCode}`);
 
-    return updated!;
+    return UrlResponseDto.fromEntity(updated!);
   }
 
   async remove(shortCode: string): Promise<void> {
@@ -69,13 +71,13 @@ export class UrlService {
     this.logger.log(`Deleted short code: ${shortCode}`);
   }
 
-  async getStats(shortCode: string): Promise<{ accessCount: number }> {
+  async getStats(shortCode: string): Promise<Url> {
     const url = await this.urlRepository.findByCode(shortCode);
 
     if (!url) {
       throw new NotFoundException(`Short code "${shortCode}" not found`);
     }
 
-    return { accessCount: url.accessCount };
+    return url;
   }
 }

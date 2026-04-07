@@ -23,8 +23,8 @@ export class UrlRepository {
     await this.repo.increment({ shortCode }, 'accessCount', 1);
   }
 
-  async updateOriginalUrl(shortCode: string, originalUrl: string): Promise<Url | null> {
-    await this.repo.update({ shortCode }, { originalUrl });
+  async updateUrl(shortCode: string, url: string): Promise<Url | null> {
+    await this.repo.update({ shortCode }, { url });
     return this.findByCode(shortCode);
   }
 

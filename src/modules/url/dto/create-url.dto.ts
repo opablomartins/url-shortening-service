@@ -6,6 +6,6 @@ export class CreateUrlDto {
     description: 'The original URL to be shortened',
     example: 'https://www.example.com/some/very/long/path',
   })
-  @IsUrl({}, { message: 'originalUrl must be a valid URL' })
-  originalUrl: string;
+  @IsUrl({}, { message: 'url must be a valid URL' })
+  url: string;
 }

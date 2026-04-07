@@ -15,7 +15,7 @@ export class Url {
 
   @ApiProperty({ example: 'https://www.example.com/some/very/long/path' })
   @Column({ name: 'original_url', type: 'text' })
-  originalUrl: string;
+  url: string;
 
   @ApiProperty({ example: 'xK9mNp' })
   @Column({ name: 'short_code', type: 'varchar', length: 10, unique: true })

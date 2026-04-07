@@ -6,6 +6,6 @@ export class UpdateUrlDto {
     description: 'The new original URL to replace the current one',
     example: 'https://www.example.com/updated/path',
   })
-  @IsUrl({}, { message: 'originalUrl must be a valid URL' })
-  originalUrl: string;
+  @IsUrl({}, { message: 'url must be a valid URL' })
+  url: string;
 }
