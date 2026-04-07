@@ -19,7 +19,10 @@ async function bootstrap() {
 
   const swaggerConfig = new DocumentBuilder()
     .setTitle('URL Shortener API')
-    .setDescription('REST API for shortening URLs, tracking access counts and managing short codes')
+    .setDescription(
+      'REST API for shortening URLs, tracking access counts and managing short codes.\n\n' +
+      '**Rate limit:** 10 requests per minute per IP.',
+    )
     .setVersion('1.0')
     .build();
 
