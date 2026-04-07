@@ -61,6 +61,7 @@ Copy `.env.example` to `.env` and adjust as needed:
 | `DB_USER` | `postgres` | PostgreSQL user |
 | `DB_PASS` | `postgres` | PostgreSQL password |
 | `DB_NAME` | `url_shortener` | PostgreSQL database name |
+| `DB_SYNCHRONIZE` | `true` | Force TypeORM schema sync (`true`/`false`) |
 | `THROTTLE_TTL` | `60000` | Rate limit window in milliseconds |
 | `THROTTLE_LIMIT` | `10` | Max requests per window per IP |
 
@@ -230,7 +231,7 @@ src/
 Chosen for its modular architecture, native dependency injection, built-in support for Swagger and testing, and widespread adoption in enterprise Node.js environments.
 
 ### TypeORM with `synchronize`
-`synchronize: true` is enabled in non-production environments so the database schema is automatically created from the entity definition — no migrations needed for local development or Docker Compose.
+`synchronize` can be controlled with `DB_SYNCHRONIZE`. If this variable is not provided, the app falls back to enabling sync only in non-production environments.
 
 ### nanoid for short codes
 `nanoid(6)` generates a 6-character URL-safe string with ~68 billion possible combinations, making collisions extremely rare. A retry mechanism (up to 3 attempts) handles the unlikely event of a collision.
