@@ -150,6 +150,23 @@ DELETE /shorten/:code
 
 ---
 
+### Redirect to Original URL
+
+```
+GET /:code
+```
+
+Although the specification suggests that the frontend handles redirection,
+this endpoint was also implemented to simulate real-world URL shortening
+services and improve user experience. It increments the access counter and
+issues an HTTP 301 redirect directly to the original URL.
+
+**Response `302 Found`** — redirects to the original URL
+
+> Uses 302 (temporary redirect) intentionally so browsers never cache the response, ensuring every visit is counted in `accessCount`.
+
+---
+
 ### Get URL Statistics
 
 ```
