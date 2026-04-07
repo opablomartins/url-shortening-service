@@ -1,98 +1,245 @@
-<p align="center">
-  <a href="http://nestjs.com/" target="blank"><img src="https://nestjs.com/img/logo-small.svg" width="120" alt="Nest Logo" /></a>
-</p>
+# URL Shortener API
 
-[circleci-image]: https://img.shields.io/circleci/build/github/nestjs/nest/master?token=abc123def456
-[circleci-url]: https://circleci.com/gh/nestjs/nest
+A RESTful API for shortening URLs, built with NestJS, TypeScript, and PostgreSQL.
 
-  <p align="center">A progressive <a href="http://nodejs.org" target="_blank">Node.js</a> framework for building efficient and scalable server-side applications.</p>
-    <p align="center">
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/v/@nestjs/core.svg" alt="NPM Version" /></a>
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/l/@nestjs/core.svg" alt="Package License" /></a>
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/dm/@nestjs/common.svg" alt="NPM Downloads" /></a>
-<a href="https://circleci.com/gh/nestjs/nest" target="_blank"><img src="https://img.shields.io/circleci/build/github/nestjs/nest/master" alt="CircleCI" /></a>
-<a href="https://discord.gg/G7Qnnhy" target="_blank"><img src="https://img.shields.io/badge/discord-online-brightgreen.svg" alt="Discord"/></a>
-<a href="https://opencollective.com/nest#backer" target="_blank"><img src="https://opencollective.com/nest/backers/badge.svg" alt="Backers on Open Collective" /></a>
-<a href="https://opencollective.com/nest#sponsor" target="_blank"><img src="https://opencollective.com/nest/sponsors/badge.svg" alt="Sponsors on Open Collective" /></a>
-  <a href="https://paypal.me/kamilmysliwiec" target="_blank"><img src="https://img.shields.io/badge/Donate-PayPal-ff3f59.svg" alt="Donate us"/></a>
-    <a href="https://opencollective.com/nest#sponsor"  target="_blank"><img src="https://img.shields.io/badge/Support%20us-Open%20Collective-41B883.svg" alt="Support us"></a>
-  <a href="https://twitter.com/nestframework" target="_blank"><img src="https://img.shields.io/twitter/follow/nestframework.svg?style=social&label=Follow" alt="Follow us on Twitter"></a>
-</p>
-  <!--[![Backers on Open Collective](https://opencollective.com/nest/backers/badge.svg)](https://opencollective.com/nest#backer)
-  [![Sponsors on Open Collective](https://opencollective.com/nest/sponsors/badge.svg)](https://opencollective.com/nest#sponsor)-->
+## Technologies
 
-## Description
+- **[NestJS](https://nestjs.com/)** — Node.js framework with modular architecture and built-in dependency injection
+- **[TypeScript](https://www.typescriptlang.org/)** — Static typing for safer, more maintainable code
+- **[TypeORM](https://typeorm.io/)** — ORM with native NestJS integration
+- **[PostgreSQL](https://www.postgresql.org/)** — Relational database
+- **[nanoid](https://github.com/ai/nanoid)** — Cryptographically secure unique ID generator for short codes
+- **[Swagger](https://swagger.io/)** — Interactive API documentation
+- **[Docker](https://www.docker.com/)** — Containerized development and deployment
 
-[Nest](https://github.com/nestjs/nest) framework TypeScript starter repository.
+## Getting Started
 
-## Project setup
+### Prerequisites
+
+- [Docker](https://docs.docker.com/get-docker/) and [Docker Compose](https://docs.docker.com/compose/)
+
+### Running with Docker (recommended)
 
 ```bash
-$ npm install
+# Clone the repository
+git clone https://github.com/opablomartins/url-shortening-service.git
+cd url-shortening-service
+
+# Start the application and database
+docker-compose up --build
 ```
 
-## Compile and run the project
+The API will be available at `http://localhost:3000`.  
+Interactive Swagger docs at `http://localhost:3000/docs`.
+
+### Running locally
 
 ```bash
-# development
-$ npm run start
+# Install dependencies
+npm install
 
-# watch mode
-$ npm run start:dev
+# Copy and configure environment variables
+cp .env.example .env
 
-# production mode
-$ npm run start:prod
+# Start a PostgreSQL instance (or use Docker just for the DB)
+docker-compose up db -d
+
+# Start in development mode (with hot reload)
+npm run start:dev
 ```
 
-## Run tests
+### Environment Variables
+
+Copy `.env.example` to `.env` and adjust as needed:
+
+| Variable | Default | Description |
+|---|---|---|
+| `PORT` | `3000` | Application port |
+| `NODE_ENV` | `development` | Environment (`development` / `production`) |
+| `DB_HOST` | `localhost` | PostgreSQL host |
+| `DB_PORT` | `5432` | PostgreSQL port |
+| `DB_USER` | `postgres` | PostgreSQL user |
+| `DB_PASS` | `postgres` | PostgreSQL password |
+| `DB_NAME` | `url_shortener` | PostgreSQL database name |
+| `THROTTLE_TTL` | `60000` | Rate limit window in milliseconds |
+| `THROTTLE_LIMIT` | `10` | Max requests per window per IP |
+
+## API Endpoints
+
+### Create Short URL
+
+```
+POST /shorten
+```
+
+**Request body:**
+```json
+{
+  "url": "https://www.example.com/some/long/url"
+}
+```
+
+**Response `201 Created`:**
+```json
+{
+  "id": "a1b2c3d4-e5f6-7890-abcd-ef1234567890",
+  "url": "https://www.example.com/some/long/url",
+  "shortCode": "xK9mNp",
+  "createdAt": "2026-04-07T12:00:00.000Z",
+  "updatedAt": "2026-04-07T12:00:00.000Z"
+}
+```
+
+---
+
+### Retrieve Original URL
+
+```
+GET /shorten/:code
+```
+
+Increments the access counter on every call.
+
+**Response `200 OK`:**
+```json
+{
+  "id": "a1b2c3d4-e5f6-7890-abcd-ef1234567890",
+  "url": "https://www.example.com/some/long/url",
+  "shortCode": "xK9mNp",
+  "createdAt": "2026-04-07T12:00:00.000Z",
+  "updatedAt": "2026-04-07T12:00:00.000Z"
+}
+```
+
+---
+
+### Update Short URL
+
+```
+PUT /shorten/:code
+```
+
+**Request body:**
+```json
+{
+  "url": "https://www.example.com/updated/url"
+}
+```
+
+**Response `200 OK`:**
+```json
+{
+  "id": "a1b2c3d4-e5f6-7890-abcd-ef1234567890",
+  "url": "https://www.example.com/updated/url",
+  "shortCode": "xK9mNp",
+  "createdAt": "2026-04-07T12:00:00.000Z",
+  "updatedAt": "2026-04-07T13:00:00.000Z"
+}
+```
+
+---
+
+### Delete Short URL
+
+```
+DELETE /shorten/:code
+```
+
+**Response `204 No Content`**
+
+---
+
+### Get URL Statistics
+
+```
+GET /shorten/:code/stats
+```
+
+**Response `200 OK`:**
+```json
+{
+  "id": "a1b2c3d4-e5f6-7890-abcd-ef1234567890",
+  "url": "https://www.example.com/some/long/url",
+  "shortCode": "xK9mNp",
+  "createdAt": "2026-04-07T12:00:00.000Z",
+  "updatedAt": "2026-04-07T12:00:00.000Z",
+  "accessCount": 10
+}
+```
+
+### Error Responses
+
+All errors follow a consistent format:
+
+```json
+{
+  "statusCode": 404,
+  "message": "Short code \"xK9mNp\" not found",
+  "error": "Not Found",
+  "path": "/shorten/xK9mNp",
+  "timestamp": "2026-04-07T12:00:00.000Z"
+}
+```
+
+| Status | Meaning |
+|---|---|
+| `400` | Validation error (invalid URL format, unexpected fields) |
+| `404` | Short code not found |
+| `409` | Failed to generate a unique short code |
+| `429` | Rate limit exceeded (10 req/min per IP) |
+
+## Running Tests
 
 ```bash
-# unit tests
-$ npm run test
+# Unit tests
+npm test
 
-# e2e tests
-$ npm run test:e2e
-
-# test coverage
-$ npm run test:cov
+# Unit tests with coverage
+npm run test:cov
 ```
 
-## Deployment
+## Project Structure
 
-When you're ready to deploy your NestJS application to production, there are some key steps you can take to ensure it runs as efficiently as possible. Check out the [deployment documentation](https://docs.nestjs.com/deployment) for more information.
-
-If you are looking for a cloud-based platform to deploy your NestJS application, check out [Mau](https://mau.nestjs.com), our official platform for deploying NestJS applications on AWS. Mau makes deployment straightforward and fast, requiring just a few simple steps:
-
-```bash
-$ npm install -g @nestjs/mau
-$ mau deploy
+```
+src/
+├── modules/
+│   └── url/
+│       ├── dto/
+│       │   ├── create-url.dto.ts      # POST body validation
+│       │   ├── update-url.dto.ts      # PUT body validation
+│       │   └── url-response.dto.ts    # Default response shape (without accessCount)
+│       ├── entities/
+│       │   └── url.entity.ts          # TypeORM entity mapping the urls table
+│       ├── url.controller.ts          # HTTP layer — routes only, no business logic
+│       ├── url.service.ts             # Business logic and short code generation
+│       ├── url.repository.ts          # Database access layer
+│       ├── url.service.spec.ts        # Unit tests for UrlService
+│       └── url.module.ts
+├── common/
+│   └── filters/
+│       └── global-exception.filter.ts # Centralized error handling
+├── database/
+│   └── database.module.ts             # TypeORM async configuration
+├── app.module.ts
+└── main.ts
 ```
 
-With Mau, you can deploy your application in just a few clicks, allowing you to focus on building features rather than managing infrastructure.
+## Technical Decisions
 
-## Resources
+### NestJS
+Chosen for its modular architecture, native dependency injection, built-in support for Swagger and testing, and widespread adoption in enterprise Node.js environments.
 
-Check out a few resources that may come in handy when working with NestJS:
+### TypeORM with `synchronize`
+`synchronize: true` is enabled in non-production environments so the database schema is automatically created from the entity definition — no migrations needed for local development or Docker Compose.
 
-- Visit the [NestJS Documentation](https://docs.nestjs.com) to learn more about the framework.
-- For questions and support, please visit our [Discord channel](https://discord.gg/G7Qnnhy).
-- To dive deeper and get more hands-on experience, check out our official video [courses](https://courses.nestjs.com/).
-- Deploy your application to AWS with the help of [NestJS Mau](https://mau.nestjs.com) in just a few clicks.
-- Visualize your application graph and interact with the NestJS application in real-time using [NestJS Devtools](https://devtools.nestjs.com).
-- Need help with your project (part-time to full-time)? Check out our official [enterprise support](https://enterprise.nestjs.com).
-- To stay in the loop and get updates, follow us on [X](https://x.com/nestframework) and [LinkedIn](https://linkedin.com/company/nestjs).
-- Looking for a job, or have a job to offer? Check out our official [Jobs board](https://jobs.nestjs.com).
+### nanoid for short codes
+`nanoid(6)` generates a 6-character URL-safe string with ~68 billion possible combinations, making collisions extremely rare. A retry mechanism (up to 3 attempts) handles the unlikely event of a collision.
 
-## Support
+### Separated read/write in repository
+`findByCode` (read) and `incrementAccessCount` (write) are intentionally separate methods. This follows the principle of separating reads from writes, making each operation independently testable and easier to optimize (e.g., caching reads in the future).
 
-Nest is an MIT-licensed open source project. It can grow thanks to the sponsors and support by the amazing backers. If you'd like to join them, please [read more here](https://docs.nestjs.com/support).
+### Response shape separation
+`UrlResponseDto` is used for create/retrieve/update responses, deliberately excluding `accessCount`. The stats endpoint returns the full entity. This enforces a clean API contract and prevents leaking internal counters where they are not expected.
 
-## Stay in touch
-
-- Author - [Kamil Myśliwiec](https://twitter.com/kammysliwiec)
-- Website - [https://nestjs.com](https://nestjs.com/)
-- Twitter - [@nestframework](https://twitter.com/nestframework)
-
-## License
-
-Nest is [MIT licensed](https://github.com/nestjs/nest/blob/master/LICENSE).
+### Rate limiting
+`@nestjs/throttler` is configured as a global guard (10 requests/minute per IP by default), protecting all endpoints uniformly without any per-route configuration. Values are configurable via environment variables.
